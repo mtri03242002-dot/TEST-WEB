@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>My Photo Storage</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- VIDEO INTRO -->
+<div id="intro">
+  <video autoplay muted id="introVideo">
+    <source src="intro.mp4" type="video/mp4">
+  </video>
+</div>
+
+<!-- MAIN WEBSITE -->
+<div id="mainContent" class="hidden">
+
+  <!-- TASKBAR -->
+  <div class="taskbar">
+    <button onclick="toggleMenu()">MENU</button>
+    <button onclick="openSettings()">SETTING</button>
+    <input type="file" id="upload" multiple>
+  </div>
+
+  <!-- MENU -->
+  <div id="menu" class="menu hidden">
+    <h3>Menu chỉnh sửa</h3>
+    <button onclick="changeBackground()">Đổi màu nền</button>
+    <button onclick="clearImages()">Xóa tất cả ảnh</button>
+  </div>
+
+  <!-- GALLERY -->
+  <div id="gallery"></div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
