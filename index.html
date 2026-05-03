@@ -22,7 +22,22 @@
 </div>
 
 <!-- POPUP PREVIEW -->
-<div id="previewBox" class="hidden" onclick="outsideClick(event)">
+<div id="previewBox" class="hidden">
+  <div class="previewContent" onclick="event.stopPropagation()">
+
+    <!-- NÚT X -->
+    <span class="closeBtn" onclick="closePreview()">✖</span>
+
+    <img id="previewImg">
+    <input type="text" id="caption" placeholder="Viết caption...">
+
+    <div class="btns">
+      <button onclick="confirmPost()">Đăng</button>
+      <button onclick="closePreview()">Hủy</button>
+    </div>
+
+  </div>
+</div>
   <div class="previewContent">
     <img id="previewImg">
     <input type="text" id="caption" placeholder="Viết caption...">
