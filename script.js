@@ -1,46 +1,96 @@
-// VIDEO INTRO
 const intro = document.getElementById("intro");
 const main = document.getElementById("mainContent");
 
 setTimeout(() => {
   intro.style.display = "none";
   main.classList.remove("hidden");
-}, 4000); // video chạy 4 giây
+}, 3000);
 
 // MENU
 function toggleMenu() {
   document.getElementById("menu").classList.toggle("hidden");
 }
 
-// SETTINGS
-function openSettings() {
-  alert("Setting đang phát triển 😄");
+// DARK MODE
+function toggleDarkMode() {
+  document.body.classList.toggle("dark");
 }
 
-// UPLOAD IMAGE
+// ĐỔI TÊN
+function changeName() {
+  const name = prompt("Nhập tên mới:");
+  if (name) {
+    document.getElementById("siteName").innerText = name;
+    document.getElementById("title").innerText = name;
+  }
+}
+
+// UPLOAD + PREVIEW + SAVE
 const upload = document.getElementById("upload");
+const preview = document.getElementById("preview");
 const gallery = document.getElementById("gallery");
 
+let images = JSON.parse(localStorage.getItem("images")) || [];
+
+function renderImages() {
+  gallery.innerHTML = "";
+  images.forEach((src, index) => {
+    const div = document.createElement("div");
+    div.className = "card";
+
+    const img = document.createElement("img");
+    img.src = src;
+
+    const btn = document.createElement("button");
+    btn.innerText = "X";
+    btn.className = "delete";
+    btn.onclick = () => deleteImage(index);
+
+    div.appendChild(img);
+    div.appendChild(btn);
+    gallery.appendChild(div);
+  });
+}
+
+renderImages();
+
 upload.addEventListener("change", function () {
+  preview.innerHTML = "";
+
   const files = this.files;
 
   for (let file of files) {
     const reader = new FileReader();
+
     reader.onload = function (e) {
+      // preview
       const img = document.createElement("img");
       img.src = e.target.result;
-      gallery.appendChild(img);
+      preview.appendChild(img);
+
+      // save
+      images.push(e.target.result);
+      localStorage.setItem("images", JSON.stringify(images));
+
+      renderImages();
     };
+
     reader.readAsDataURL(file);
   }
 });
 
-// MENU FUNCTIONS
-function changeBackground() {
-  document.body.style.background =
-    "#" + Math.floor(Math.random() * 16777215).toString(16);
+// DELETE
+function deleteImage(index) {
+  images.splice(index, 1);
+  localStorage.setItem("images", JSON.stringify(images));
+  renderImages();
 }
 
+// CLEAR
 function clearImages() {
-  gallery.innerHTML = "";
+  if (confirm("Xóa hết ảnh?")) {
+    images = [];
+    localStorage.removeItem("images");
+    renderImages();
+  }
 }
