@@ -1,87 +1,63 @@
 let posts = JSON.parse(localStorage.getItem("posts")) || [];
+let currentImage = "";
 
-function save() {
-  localStorage.setItem("posts", JSON.stringify(posts));
-}
-
+// RENDER
 function render() {
   const feed = document.getElementById("feed");
   feed.innerHTML = "";
 
-  posts.forEach((p, index) => {
+  posts.forEach(p => {
     const div = document.createElement("div");
     div.className = "post";
 
     div.innerHTML = `
       <img src="${p.img}">
-      <div class="actions">
-        <p>${p.caption}</p>
-        ❤️ ${p.likes}
-        <button onclick="likePost(${index})">Like</button>
-        <button onclick="deletePost(${index})">Xóa</button>
-
-        <div>
-          ${p.comments.map(c => `<p>💬 ${c}</p>`).join("")}
-        </div>
-
-        <div class="commentBox">
-          <input id="c${index}" placeholder="Comment...">
-          <button onclick="addComment(${index})">Gửi</button>
-        </div>
-      </div>
+      <p style="padding:10px">${p.caption}</p>
     `;
 
     feed.appendChild(div);
   });
 }
-
 render();
 
-function addPost() {
-  const file = document.getElementById("upload").files[0];
-  const caption = document.getElementById("caption").value;
-
-  if (!file) return alert("Chọn ảnh");
+// CHỌN ẢNH → HIỆN PREVIEW
+document.getElementById("upload").addEventListener("change", function () {
+  const file = this.files[0];
+  if (!file) return;
 
   const reader = new FileReader();
 
-  reader.onload = function(e) {
-    posts.unshift({
-      img: e.target.result,
-      caption,
-      likes: 0,
-      comments: []
-    });
-
-    save();
-    render();
+  reader.onload = function (e) {
+    currentImage = e.target.result;
+    document.getElementById("previewImg").src = currentImage;
+    document.getElementById("previewBox").classList.remove("hidden");
   };
 
   reader.readAsDataURL(file);
-}
+});
 
-function likePost(i) {
-  posts[i].likes++;
-  save();
+// ĐĂNG
+function confirmPost() {
+  const caption = document.getElementById("caption").value;
+
+  posts.unshift({
+    img: currentImage,
+    caption
+  });
+
+  localStorage.setItem("posts", JSON.stringify(posts));
+
+  closePreview();
   render();
 }
 
-function deletePost(i) {
-  posts.splice(i, 1);
-  save();
-  render();
+// ĐÓNG PREVIEW
+function closePreview() {
+  document.getElementById("previewBox").classList.add("hidden");
+  document.getElementById("caption").value = "";
 }
 
-function addComment(i) {
-  const input = document.getElementById("c" + i);
-  if (input.value) {
-    posts[i].comments.push(input.value);
-    input.value = "";
-    save();
-    render();
-  }
-}
-
+// DARK MODE
 function toggleDark() {
   document.body.classList.toggle("dark");
 }
