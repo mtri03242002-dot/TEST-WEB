@@ -1,10 +1,17 @@
 body {
   margin: 0;
   font-family: Arial;
-  background: #87CEEB; /* xanh bầu trời */
+  background: linear-gradient(to right, #87CEEB, #bde0fe);
+  transition: 0.3s;
 }
 
-/* VIDEO INTRO */
+/* DARK MODE */
+.dark {
+  background: #1e1e1e;
+  color: white;
+}
+
+/* INTRO */
 #intro {
   position: fixed;
   width: 100%;
@@ -18,45 +25,59 @@ body {
   object-fit: cover;
 }
 
-/* MAIN */
 .hidden {
   display: none;
 }
 
 /* TASKBAR */
 .taskbar {
-  background: #5DADE2;
-  padding: 10px;
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.5);
   display: flex;
-  gap: 10px;
-}
-
-.taskbar button {
-  background: white;
-  border: none;
-  padding: 8px;
-  cursor: pointer;
+  justify-content: space-between;
+  padding: 10px;
 }
 
 /* MENU */
 .menu {
+  position: absolute;
+  top: 60px;
+  left: 10px;
   background: white;
   padding: 10px;
-  position: absolute;
-  top: 50px;
-  left: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
+}
+
+/* PREVIEW */
+#preview img {
+  width: 100px;
+  margin: 10px;
+  border-radius: 10px;
 }
 
 /* GALLERY */
 #gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 10px;
+  gap: 15px;
   padding: 20px;
 }
 
-#gallery img {
+.card {
+  position: relative;
+}
+
+.card img {
   width: 100%;
-  border-radius: 10px;
+  border-radius: 12px;
+}
+
+.delete {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: red;
+  color: white;
+  border: none;
+  cursor: pointer;
 }
