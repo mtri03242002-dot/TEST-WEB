@@ -1,96 +1,87 @@
-const intro = document.getElementById("intro");
-const main = document.getElementById("mainContent");
+let posts = JSON.parse(localStorage.getItem("posts")) || [];
 
-setTimeout(() => {
-  intro.style.display = "none";
-  main.classList.remove("hidden");
-}, 3000);
-
-// MENU
-function toggleMenu() {
-  document.getElementById("menu").classList.toggle("hidden");
+function save() {
+  localStorage.setItem("posts", JSON.stringify(posts));
 }
 
-// DARK MODE
-function toggleDarkMode() {
-  document.body.classList.toggle("dark");
-}
+function render() {
+  const feed = document.getElementById("feed");
+  feed.innerHTML = "";
 
-// ĐỔI TÊN
-function changeName() {
-  const name = prompt("Nhập tên mới:");
-  if (name) {
-    document.getElementById("siteName").innerText = name;
-    document.getElementById("title").innerText = name;
-  }
-}
-
-// UPLOAD + PREVIEW + SAVE
-const upload = document.getElementById("upload");
-const preview = document.getElementById("preview");
-const gallery = document.getElementById("gallery");
-
-let images = JSON.parse(localStorage.getItem("images")) || [];
-
-function renderImages() {
-  gallery.innerHTML = "";
-  images.forEach((src, index) => {
+  posts.forEach((p, index) => {
     const div = document.createElement("div");
-    div.className = "card";
+    div.className = "post";
 
-    const img = document.createElement("img");
-    img.src = src;
+    div.innerHTML = `
+      <img src="${p.img}">
+      <div class="actions">
+        <p>${p.caption}</p>
+        ❤️ ${p.likes}
+        <button onclick="likePost(${index})">Like</button>
+        <button onclick="deletePost(${index})">Xóa</button>
 
-    const btn = document.createElement("button");
-    btn.innerText = "X";
-    btn.className = "delete";
-    btn.onclick = () => deleteImage(index);
+        <div>
+          ${p.comments.map(c => `<p>💬 ${c}</p>`).join("")}
+        </div>
 
-    div.appendChild(img);
-    div.appendChild(btn);
-    gallery.appendChild(div);
+        <div class="commentBox">
+          <input id="c${index}" placeholder="Comment...">
+          <button onclick="addComment(${index})">Gửi</button>
+        </div>
+      </div>
+    `;
+
+    feed.appendChild(div);
   });
 }
 
-renderImages();
+render();
 
-upload.addEventListener("change", function () {
-  preview.innerHTML = "";
+function addPost() {
+  const file = document.getElementById("upload").files[0];
+  const caption = document.getElementById("caption").value;
 
-  const files = this.files;
+  if (!file) return alert("Chọn ảnh");
 
-  for (let file of files) {
-    const reader = new FileReader();
+  const reader = new FileReader();
 
-    reader.onload = function (e) {
-      // preview
-      const img = document.createElement("img");
-      img.src = e.target.result;
-      preview.appendChild(img);
+  reader.onload = function(e) {
+    posts.unshift({
+      img: e.target.result,
+      caption,
+      likes: 0,
+      comments: []
+    });
 
-      // save
-      images.push(e.target.result);
-      localStorage.setItem("images", JSON.stringify(images));
+    save();
+    render();
+  };
 
-      renderImages();
-    };
-
-    reader.readAsDataURL(file);
-  }
-});
-
-// DELETE
-function deleteImage(index) {
-  images.splice(index, 1);
-  localStorage.setItem("images", JSON.stringify(images));
-  renderImages();
+  reader.readAsDataURL(file);
 }
 
-// CLEAR
-function clearImages() {
-  if (confirm("Xóa hết ảnh?")) {
-    images = [];
-    localStorage.removeItem("images");
-    renderImages();
+function likePost(i) {
+  posts[i].likes++;
+  save();
+  render();
+}
+
+function deletePost(i) {
+  posts.splice(i, 1);
+  save();
+  render();
+}
+
+function addComment(i) {
+  const input = document.getElementById("c" + i);
+  if (input.value) {
+    posts[i].comments.push(input.value);
+    input.value = "";
+    save();
+    render();
   }
+}
+
+function toggleDark() {
+  document.body.classList.toggle("dark");
 }
