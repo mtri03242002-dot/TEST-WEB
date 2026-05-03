@@ -44,7 +44,7 @@ body {
   display: none;
 }
 
-/* POPUP iPhone */
+/* POPUP */
 #popup {
   position: fixed;
   bottom: -100%;
@@ -96,6 +96,7 @@ body {
   border-radius: 12px;
   margin-bottom: 20px;
   overflow: hidden;
+  position: relative;
 }
 
 .post img {
@@ -104,6 +105,19 @@ body {
 
 .post p {
   padding: 10px;
+}
+
+/* NÚT XOÁ */
+.deleteBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: red;
+  color: white;
+  border: none;
+  padding: 5px 8px;
+  cursor: pointer;
+  border-radius: 5px;
 }
 </style>
 
@@ -116,7 +130,7 @@ body {
 
   <label class="uploadBtn">
     ➕
-    <input type="file" id="upload" hidden>
+    <input type="file" id="upload" accept="image/*" hidden>
   </label>
 </div>
 
@@ -143,16 +157,17 @@ body {
 let posts = JSON.parse(localStorage.getItem("posts")) || [];
 let currentImage = "";
 
-// render
+// RENDER
 function render() {
   const feed = document.getElementById("feed");
   feed.innerHTML = "";
 
-  posts.forEach(p => {
+  posts.forEach((p, index) => {
     const div = document.createElement("div");
     div.className = "post";
 
     div.innerHTML = `
+      <button class="deleteBtn" onclick="deletePost(${index})">X</button>
       <img src="${p.img}">
       <p>${p.caption}</p>
     `;
@@ -162,10 +177,16 @@ function render() {
 }
 render();
 
-// upload
+// CHỌN ẢNH
 document.getElementById("upload").addEventListener("change", function () {
   const file = this.files[0];
   if (!file) return;
+
+  // kiểm tra đúng là ảnh
+  if (!file.type.startsWith("image/")) {
+    alert("Chỉ chọn file ảnh!");
+    return;
+  }
 
   const reader = new FileReader();
 
@@ -180,7 +201,36 @@ document.getElementById("upload").addEventListener("change", function () {
   reader.readAsDataURL(file);
 });
 
-// đóng
+// ĐĂNG BÀI (FIX LỖI CHÍNH)
+function confirmPost() {
+  const caption = document.getElementById("caption").value;
+
+  if (!currentImage) {
+    alert("Bạn chưa chọn ảnh!");
+    return;
+  }
+
+  posts.unshift({
+    img: currentImage,
+    caption: caption || ""
+  });
+
+  localStorage.setItem("posts", JSON.stringify(posts));
+
+  closePreview();
+  render();
+}
+
+// XOÁ BÀI
+function deletePost(index) {
+  if (confirm("Xoá bài này?")) {
+    posts.splice(index, 1);
+    localStorage.setItem("posts", JSON.stringify(posts));
+    render();
+  }
+}
+
+// ĐÓNG POPUP
 function closePreview() {
   document.getElementById("popup").classList.remove("show");
   document.getElementById("overlay").classList.add("hidden");
@@ -190,22 +240,7 @@ function closePreview() {
   currentImage = "";
 }
 
-// đăng
-function confirmPost() {
-  const caption = document.getElementById("caption").value;
-
-  posts.unshift({
-    img: currentImage,
-    caption
-  });
-
-  localStorage.setItem("posts", JSON.stringify(posts));
-
-  closePreview();
-  render();
-}
-
-// kéo xuống để đóng (giống iPhone)
+// KÉO XUỐNG ĐỂ ĐÓNG
 let startY = 0;
 
 document.getElementById("popup").addEventListener("touchstart", e => {
