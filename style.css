@@ -4,7 +4,7 @@ body {
   background: linear-gradient(to right, #87CEEB, #bde0fe);
 }
 
-/* TASKBAR XỊN */
+/* TASKBAR */
 .taskbar {
   position: sticky;
   top: 0;
@@ -12,7 +12,7 @@ body {
   background: rgba(255,255,255,0.6);
   display: flex;
   justify-content: space-between;
-  padding: 10px 20px;
+  padding: 12px 20px;
   border-bottom: 1px solid rgba(0,0,0,0.1);
 }
 
@@ -24,12 +24,13 @@ body {
 .uploadBtn {
   background: #4da6ff;
   color: white;
-  padding: 8px 12px;
+  padding: 10px;
   border-radius: 50%;
   cursor: pointer;
+  font-size: 18px;
 }
 
-/* PREVIEW */
+/* POPUP */
 #previewBox {
   position: fixed;
   top: 0;
@@ -47,11 +48,30 @@ body {
   padding: 20px;
   border-radius: 15px;
   text-align: center;
+  animation: zoomIn 0.2s ease;
+}
+
+@keyframes zoomIn {
+  from {transform: scale(0.8); opacity: 0;}
+  to {transform: scale(1); opacity: 1;}
 }
 
 .previewContent img {
   width: 250px;
   border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.previewContent input {
+  padding: 8px;
+  width: 90%;
+  margin-bottom: 10px;
+}
+
+.btns {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
 }
 
 .hidden {
@@ -72,4 +92,8 @@ body {
 
 .post img {
   width: 100%;
+}
+
+.post p {
+  padding: 10px;
 }
