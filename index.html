@@ -71,15 +71,19 @@ body {
 
 #popup img {
   width: 100%;
+  max-height: 300px;
+  object-fit: contain;
   border-radius: 10px;
 }
 
+/* INPUT */
 #popup input {
   width: 95%;
   padding: 10px;
   margin-top: 10px;
 }
 
+/* BUTTON */
 .btns {
   display: flex;
   justify-content: space-around;
@@ -97,17 +101,20 @@ body {
   margin-bottom: 20px;
   overflow: hidden;
   position: relative;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .post img {
   width: 100%;
+  height: 250px;
+  object-fit: cover;
 }
 
 .post p {
   padding: 10px;
 }
 
-/* NÚT XOÁ */
+/* DELETE */
 .deleteBtn {
   position: absolute;
   top: 10px;
@@ -177,12 +184,11 @@ function render() {
 }
 render();
 
-// CHỌN ẢNH
+// UPLOAD
 document.getElementById("upload").addEventListener("change", function () {
   const file = this.files[0];
   if (!file) return;
 
-  // kiểm tra đúng là ảnh
   if (!file.type.startsWith("image/")) {
     alert("Chỉ chọn file ảnh!");
     return;
@@ -201,7 +207,7 @@ document.getElementById("upload").addEventListener("change", function () {
   reader.readAsDataURL(file);
 });
 
-// ĐĂNG BÀI (FIX LỖI CHÍNH)
+// ĐĂNG
 function confirmPost() {
   const caption = document.getElementById("caption").value;
 
@@ -221,7 +227,7 @@ function confirmPost() {
   render();
 }
 
-// XOÁ BÀI
+// XOÁ
 function deletePost(index) {
   if (confirm("Xoá bài này?")) {
     posts.splice(index, 1);
@@ -230,17 +236,18 @@ function deletePost(index) {
   }
 }
 
-// ĐÓNG POPUP
+// ĐÓNG
 function closePreview() {
   document.getElementById("popup").classList.remove("show");
   document.getElementById("overlay").classList.add("hidden");
 
   document.getElementById("caption").value = "";
   document.getElementById("upload").value = "";
+  document.getElementById("previewImg").src = "";
   currentImage = "";
 }
 
-// KÉO XUỐNG ĐỂ ĐÓNG
+// KÉO XUỐNG ĐÓNG
 let startY = 0;
 
 document.getElementById("popup").addEventListener("touchstart", e => {
