@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>My Insta</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(to right, #87CEEB, #bde0fe);
+}
+
+/* TASKBAR */
+.taskbar {
+  position: sticky;
+  top: 0;
+  backdrop-filter: blur(15px);
+  background: rgba(255,255,255,0.6);
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 20px;
+}
+
+.uploadBtn {
+  background: #4da6ff;
+  color: white;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* OVERLAY */
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+}
+
+.hidden {
+  display: none;
+}
+
+/* POPUP iPhone */
+#popup {
+  position: fixed;
+  bottom: -100%;
+  left: 0;
+  width: 100%;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  padding: 20px;
+  transition: 0.3s;
+}
+
+#popup.show {
+  bottom: 0;
+}
+
+.handle {
+  width: 40px;
+  height: 5px;
+  background: #ccc;
+  border-radius: 10px;
+  margin: auto;
+  margin-bottom: 10px;
+}
+
+#popup img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+#popup input {
+  width: 95%;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.btns {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+}
+
+/* FEED */
+#feed {
+  padding: 20px;
+}
+
+.post {
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.post img {
+  width: 100%;
+}
+
+.post p {
+  padding: 10px;
+}
+</style>
+
+</head>
+<body>
+
+<!-- TASKBAR -->
+<div class="taskbar">
+  <h2>📸 My Insta</h2>
+
+  <label class="uploadBtn">
+    ➕
+    <input type="file" id="upload" hidden>
+  </label>
+</div>
+
+<!-- OVERLAY -->
+<div id="overlay" class="hidden" onclick="closePreview()"></div>
+
+<!-- POPUP -->
+<div id="popup">
+  <div class="handle"></div>
+
+  <img id="previewImg">
+  <input type="text" id="caption" placeholder="Viết caption...">
+
+  <div class="btns">
+    <button onclick="confirmPost()">Đăng</button>
+    <button onclick="closePreview()">Hủy</button>
+  </div>
+</div>
+
+<!-- FEED -->
+<div id="feed"></div>
+
+<script>
+let posts = JSON.parse(localStorage.getItem("posts")) || [];
+let currentImage = "";
+
+// render
+function render() {
+  const feed = document.getElementById("feed");
+  feed.innerHTML = "";
+
+  posts.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "post";
+
+    div.innerHTML = `
+      <img src="${p.img}">
+      <p>${p.caption}</p>
+    `;
+
+    feed.appendChild(div);
+  });
+}
+render();
+
+// upload
+document.getElementById("upload").addEventListener("change", function () {
+  const file = this.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function (e) {
+    currentImage = e.target.result;
+    document.getElementById("previewImg").src = currentImage;
+
+    document.getElementById("popup").classList.add("show");
+    document.getElementById("overlay").classList.remove("hidden");
+  };
+
+  reader.readAsDataURL(file);
+});
+
+// đóng
+function closePreview() {
+  document.getElementById("popup").classList.remove("show");
+  document.getElementById("overlay").classList.add("hidden");
+
+  document.getElementById("caption").value = "";
+  document.getElementById("upload").value = "";
+  currentImage = "";
+}
+
+// đăng
+function confirmPost() {
+  const caption = document.getElementById("caption").value;
+
+  posts.unshift({
+    img: currentImage,
+    caption
+  });
+
+  localStorage.setItem("posts", JSON.stringify(posts));
+
+  closePreview();
+  render();
+}
+
+// kéo xuống để đóng (giống iPhone)
+let startY = 0;
+
+document.getElementById("popup").addEventListener("touchstart", e => {
+  startY = e.touches[0].clientY;
+});
+
+document.getElementById("popup").addEventListener("touchmove", e => {
+  let moveY = e.touches[0].clientY;
+
+  if (moveY - startY > 100) {
+    closePreview();
+  }
+});
+</script>
+
+</body>
+</html>
