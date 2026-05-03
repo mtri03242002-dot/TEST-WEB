@@ -71,3 +71,6 @@ function outsideClick(e) {
 function toggleDark() {
   document.body.classList.toggle("dark");
 }
+document.getElementById("previewBox").onclick = function () {
+  closePreview();
+};
