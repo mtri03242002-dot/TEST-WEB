@@ -10,8 +10,7 @@
 body {
   margin: 0;
   font-family: Arial;
-  background: linear-gradient(to right, #87CEEB, #bde0fe);
-  transition: 0.3s;
+  background: #87CEEB;
 }
 
 /* TASKBAR */
@@ -39,30 +38,57 @@ body {
   cursor: pointer;
 }
 
-/* OVERLAY */
-#overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.4);
-  z-index: 999;
+/* FEED GRID */
+#feed {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
 }
 
-.hidden {
-  display: none;
+/* POST */
+.post {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.post img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+}
+
+/* DELETE */
+.deleteBtn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: red;
+  color: white;
+  border: none;
+  cursor: pointer;
 }
 
 /* POPUP */
+#overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  top: 0;
+  left: 0;
+  z-index: 999;
+}
+
 #popup {
   position: fixed;
   bottom: -100%;
-  left: 0;
   width: 100%;
   background: white;
-  border-radius: 20px 20px 0 0;
   padding: 20px;
+  border-radius: 20px 20px 0 0;
   transition: 0.3s;
   z-index: 1001;
 }
@@ -71,19 +97,8 @@ body {
   bottom: 0;
 }
 
-.handle {
-  width: 40px;
-  height: 5px;
-  background: #ccc;
-  border-radius: 10px;
-  margin: auto;
-  margin-bottom: 10px;
-}
-
-#popup img {
-  width: 100%;
-  max-height: 250px;
-  object-fit: contain;
+.hidden {
+  display: none;
 }
 
 /* SETTING */
@@ -92,43 +107,9 @@ body {
   top: 60px;
   right: 20px;
   background: white;
-  padding: 15px;
-  border-radius: 12px;
-  z-index: 1002;
-}
-
-/* FEED */
-#feed {
-  padding: 20px;
-}
-
-.post {
-  background: white;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  overflow: hidden;
-  position: relative;
-}
-
-.post img {
-  width: 100%;
-  object-fit: contain;
-  background: #f0f0f0;
-}
-
-.post p {
   padding: 10px;
-}
-
-.deleteBtn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: red;
-  color: white;
-  border: none;
-  padding: 5px 8px;
-  cursor: pointer;
+  border-radius: 10px;
+  z-index: 1002;
 }
 </style>
 </head>
@@ -150,27 +131,17 @@ body {
   </div>
 </div>
 
-<!-- SETTING -->
 <div id="settingPanel" class="hidden">
   <p>🎨 Màu nền</p>
   <input type="color" id="colorPicker">
-
-  <p>🖼️ Size ảnh</p>
-  <input type="range" id="sizeRange" min="150" max="350">
 </div>
 
-<!-- OVERLAY -->
 <div id="overlay" class="hidden" onclick="closePreview()"></div>
 
-<!-- POPUP -->
 <div id="popup">
-  <div class="handle"></div>
-  <img id="previewImg">
-  <input type="text" id="caption" placeholder="Caption (áp dụng cho tất cả ảnh)">
-  <div>
-    <button onclick="confirmPost()">Đăng tất cả</button>
-    <button onclick="closePreview()">Hủy</button>
-  </div>
+  <img id="previewImg" style="width:100%">
+  <input type="text" id="caption" placeholder="Caption">
+  <button onclick="confirmPost()">Đăng</button>
 </div>
 
 <div id="feed"></div>
@@ -178,15 +149,13 @@ body {
 <script>
 let posts = JSON.parse(localStorage.getItem("posts")) || [];
 let settings = JSON.parse(localStorage.getItem("settings")) || {
-  color: "#87CEEB",
-  size: 200
+  color: "#87CEEB"
 };
 
 let selectedImages = [];
 
 // APPLY SETTING
 document.body.style.background = settings.color;
-document.getElementById("sizeRange").value = settings.size;
 document.getElementById("colorPicker").value = settings.color;
 
 // RENDER
@@ -200,8 +169,7 @@ function render() {
 
     div.innerHTML = `
       <button class="deleteBtn" onclick="deletePost(${i})">X</button>
-      <img src="${p.img}" style="height:${settings.size}px">
-      <p>${p.caption}</p>
+      <img src="${p.img}">
     `;
 
     feed.appendChild(div);
@@ -209,20 +177,16 @@ function render() {
 }
 render();
 
-// UPLOAD MULTIPLE
+// UPLOAD
 document.getElementById("upload").addEventListener("change", function () {
   selectedImages = [];
   const files = this.files;
-
-  if (!files.length) return;
 
   Array.from(files).forEach(file => {
     const reader = new FileReader();
 
     reader.onload = function (e) {
       selectedImages.push(e.target.result);
-
-      // preview ảnh đầu tiên
       document.getElementById("previewImg").src = selectedImages[0];
     };
 
@@ -233,18 +197,13 @@ document.getElementById("upload").addEventListener("change", function () {
   document.getElementById("overlay").classList.remove("hidden");
 });
 
-// POST MULTIPLE
+// POST
 function confirmPost() {
-  const caption = document.getElementById("caption").value;
-
-  if (!selectedImages.length) return alert("Chưa chọn ảnh");
-
   selectedImages.forEach(img => {
-    posts.unshift({ img, caption });
+    posts.unshift({ img });
   });
 
   localStorage.setItem("posts", JSON.stringify(posts));
-
   closePreview();
   render();
 }
@@ -260,10 +219,7 @@ function deletePost(i) {
 function closePreview() {
   document.getElementById("popup").classList.remove("show");
   document.getElementById("overlay").classList.add("hidden");
-
-  document.getElementById("caption").value = "";
   document.getElementById("upload").value = "";
-  document.getElementById("previewImg").src = "";
   selectedImages = [];
 }
 
@@ -272,18 +228,10 @@ function toggleSetting() {
   document.getElementById("settingPanel").classList.toggle("hidden");
 }
 
-// CHANGE COLOR
 document.getElementById("colorPicker").addEventListener("input", function() {
   settings.color = this.value;
   document.body.style.background = settings.color;
   localStorage.setItem("settings", JSON.stringify(settings));
-});
-
-// CHANGE SIZE
-document.getElementById("sizeRange").addEventListener("input", function() {
-  settings.size = this.value;
-  localStorage.setItem("settings", JSON.stringify(settings));
-  render();
 });
 </script>
 
