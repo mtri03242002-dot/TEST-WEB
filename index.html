@@ -7,45 +7,31 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #87CEEB;
-}
+body { margin:0; font-family:Arial; background:#87CEEB; }
 
-/* TASKBAR */
 .taskbar {
-  position: sticky;
-  top: 0;
-  backdrop-filter: blur(10px);
-  background: rgba(255,255,255,0.6);
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 20px;
-  z-index: 1000;
+  position: sticky; top:0;
+  display:flex; justify-content:space-between;
+  padding:12px 20px;
+  background:rgba(255,255,255,0.6);
+  z-index:1000;
 }
 
-.actions {
-  display: flex;
-  gap: 10px;
-}
+.actions { display:flex; gap:10px; }
 
 .uploadBtn, .settingBtn {
-  background: #4da6ff;
-  color: white;
-  padding: 10px;
-  border-radius: 50%;
-  cursor: pointer;
+  background:#4da6ff; color:white;
+  padding:10px; border-radius:50%;
+  cursor:pointer;
 }
 
-/* GRID */
+/* FEED */
 #feed {
-  padding: 15px;
   column-count: 3;
   column-gap: 10px;
+  padding: 10px;
 }
 
-/* POST */
 .post {
   break-inside: avoid;
   margin-bottom: 10px;
@@ -58,78 +44,48 @@ body {
 .post img {
   width: 100%;
   height: auto;
-  display: block;
 }
 
-.caption {
-  padding: 8px;
-  font-size: 14px;
-}
+.caption { padding:8px; }
 
 /* DELETE */
 .deleteBtn {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background: red;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-/* OVERLAY */
-#overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-  z-index: 2000;
+  position:absolute; top:5px; right:5px;
+  background:red; color:white; border:none;
+  cursor:pointer;
 }
 
 /* POPUP */
+#overlay {
+  position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.5);
+  z-index:2000;
+}
+
 #popup {
-  position: fixed;
-  bottom: -100%;
-  left: 0;
-  width: 100%;
-  background: white;
-  padding: 20px;
-  border-radius: 20px 20px 0 0;
-  transition: 0.3s;
-  z-index: 2001;
+  position:fixed; bottom:-100%;
+  width:100%;
+  background:white;
+  padding:20px;
+  transition:0.3s;
+  z-index:2001;
 }
 
-#popup.show {
-  bottom: 0;
-}
+#popup.show { bottom:0; }
 
-.hidden {
-  display: none;
-}
+.hidden { display:none; }
 
 #popup img {
-  width: 100%;
-  max-height: 300px;
-  object-fit: contain;
+  width:100%;
+  max-height:250px;
+  object-fit:contain;
 }
 
 #popup input {
-  width: 95%;
-  padding: 10px;
-  margin-top: 10px;
-}
-
-/* SETTING */
-#settingPanel {
-  position: fixed;
-  top: 60px;
-  right: 20px;
-  background: white;
-  padding: 10px;
-  border-radius: 10px;
-  z-index: 3000;
+  width:95%;
+  padding:10px;
+  margin-top:10px;
 }
 </style>
 </head>
@@ -144,22 +100,14 @@ body {
       <i class="fa-solid fa-plus"></i>
       <input type="file" id="upload" multiple hidden>
     </label>
-
-    <button class="settingBtn" onclick="toggleSetting()">
-      <i class="fa-solid fa-gear"></i>
-    </button>
   </div>
-</div>
-
-<div id="settingPanel" class="hidden">
-  <input type="color" id="colorPicker">
 </div>
 
 <div id="overlay" class="hidden" onclick="closePreview()"></div>
 
 <div id="popup">
   <img id="previewImg">
-  <input type="text" id="caption" placeholder="Nhập caption...">
+  <input type="text" id="caption" placeholder="Caption...">
   <br><br>
   <button onclick="confirmPost()">Đăng</button>
   <button onclick="closePreview()">Hủy</button>
@@ -169,22 +117,14 @@ body {
 
 <script>
 let posts = JSON.parse(localStorage.getItem("posts")) || [];
-let settings = JSON.parse(localStorage.getItem("settings")) || {
-  color: "#87CEEB"
-};
-
 let selectedImages = [];
 
-// APPLY
-document.body.style.background = settings.color;
-document.getElementById("colorPicker").value = settings.color;
-
-// RENDER
+// render
 function render() {
   const feed = document.getElementById("feed");
   feed.innerHTML = "";
 
-  posts.forEach((p, i) => {
+  posts.forEach((p,i) => {
     const div = document.createElement("div");
     div.className = "post";
 
@@ -199,29 +139,33 @@ function render() {
 }
 render();
 
-// UPLOAD
-document.getElementById("upload").addEventListener("change", function () {
-  selectedImages = [];
-  const files = this.files;
-
+// 🔥 FIX ĐĂNG NHIỀU ẢNH
+document.getElementById("upload").addEventListener("change", async function () {
+  const files = Array.from(this.files);
   if (!files.length) return;
 
-  Array.from(files).forEach(file => {
-    const reader = new FileReader();
+  selectedImages = [];
 
-    reader.onload = function (e) {
-      selectedImages.push(e.target.result);
-      document.getElementById("previewImg").src = selectedImages[0];
-    };
+  await Promise.all(files.map(file => {
+    return new Promise(resolve => {
+      const reader = new FileReader();
 
-    reader.readAsDataURL(file);
-  });
+      reader.onload = function (e) {
+        selectedImages.push(e.target.result);
+        resolve();
+      };
+
+      reader.readAsDataURL(file);
+    });
+  }));
+
+  document.getElementById("previewImg").src = selectedImages[0];
 
   document.getElementById("popup").classList.add("show");
   document.getElementById("overlay").classList.remove("hidden");
 });
 
-// POST
+// đăng
 function confirmPost() {
   const caption = document.getElementById("caption").value;
 
@@ -235,14 +179,14 @@ function confirmPost() {
   render();
 }
 
-// DELETE
+// xoá
 function deletePost(i) {
-  posts.splice(i, 1);
+  posts.splice(i,1);
   localStorage.setItem("posts", JSON.stringify(posts));
   render();
 }
 
-// CLOSE
+// đóng
 function closePreview() {
   document.getElementById("popup").classList.remove("show");
   document.getElementById("overlay").classList.add("hidden");
@@ -250,19 +194,9 @@ function closePreview() {
   document.getElementById("upload").value = "";
   document.getElementById("caption").value = "";
   document.getElementById("previewImg").src = "";
+
   selectedImages = [];
 }
-
-// SETTING
-function toggleSetting() {
-  document.getElementById("settingPanel").classList.toggle("hidden");
-}
-
-document.getElementById("colorPicker").addEventListener("input", function() {
-  settings.color = this.value;
-  document.body.style.background = settings.color;
-  localStorage.setItem("settings", JSON.stringify(settings));
-});
 </script>
 
 </body>
