@@ -2,43 +2,23 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title id="title">My Gallery</title>
+  <title>Mini Instagram</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- VIDEO INTRO -->
-<div id="intro">
-  <video autoplay muted>
-    <source src="intro.mp4" type="video/mp4">
-  </video>
+<div class="header">
+  <h2>📸 My Insta</h2>
+  <button onclick="toggleDark()">🌙</button>
 </div>
 
-<!-- MAIN -->
-<div id="mainContent" class="hidden">
-
-  <!-- TASKBAR -->
-  <div class="taskbar">
-    <h2 id="siteName">My Gallery</h2>
-    <button onclick="toggleMenu()">MENU</button>
-    <button onclick="toggleDarkMode()">🌙</button>
-    <input type="file" id="upload" multiple>
-  </div>
-
-  <!-- MENU -->
-  <div id="menu" class="menu hidden">
-    <h3>⚙ MENU</h3>
-    <button onclick="changeName()">Đổi tên website</button>
-    <button onclick="clearImages()">Xóa tất cả ảnh</button>
-  </div>
-
-  <!-- PREVIEW -->
-  <div id="preview"></div>
-
-  <!-- GALLERY -->
-  <div id="gallery"></div>
-
+<div class="uploadBox">
+  <input type="file" id="upload">
+  <input type="text" id="caption" placeholder="Viết caption...">
+  <button onclick="addPost()">Đăng</button>
 </div>
+
+<div id="feed"></div>
 
 <script src="script.js"></script>
 </body>
