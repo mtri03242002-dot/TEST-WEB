@@ -1,7 +1,7 @@
 let posts = JSON.parse(localStorage.getItem("posts")) || [];
 let currentImage = "";
 
-// RENDER
+// HIỂN THỊ
 function render() {
   const feed = document.getElementById("feed");
   feed.innerHTML = "";
@@ -12,15 +12,16 @@ function render() {
 
     div.innerHTML = `
       <img src="${p.img}">
-      <p style="padding:10px">${p.caption}</p>
+      <p>${p.caption}</p>
     `;
 
     feed.appendChild(div);
   });
 }
+
 render();
 
-// CHỌN ẢNH → HIỆN PREVIEW
+// CHỌN ẢNH
 document.getElementById("upload").addEventListener("change", function () {
   const file = this.files[0];
   if (!file) return;
@@ -36,7 +37,7 @@ document.getElementById("upload").addEventListener("change", function () {
   reader.readAsDataURL(file);
 });
 
-// ĐĂNG
+// ĐĂNG BÀI
 function confirmPost() {
   const caption = document.getElementById("caption").value;
 
@@ -51,10 +52,19 @@ function confirmPost() {
   render();
 }
 
-// ĐÓNG PREVIEW
+// ĐÓNG POPUP
 function closePreview() {
   document.getElementById("previewBox").classList.add("hidden");
   document.getElementById("caption").value = "";
+  currentImage = "";
+  document.getElementById("upload").value = "";
+}
+
+// CLICK RA NGOÀI → ĐÓNG
+function outsideClick(e) {
+  if (e.target.id === "previewBox") {
+    closePreview();
+  }
 }
 
 // DARK MODE
