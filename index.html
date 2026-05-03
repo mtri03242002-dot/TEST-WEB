@@ -21,13 +21,15 @@
   </div>
 </div>
 
-<!-- PREVIEW POPUP -->
+<!-- POPUP PREVIEW -->
 <div id="previewBox" class="hidden" onclick="outsideClick(event)">
   <div class="previewContent">
     <img id="previewImg">
     <input type="text" id="caption" placeholder="Viết caption...">
-    <button onclick="confirmPost()">Đăng</button>
-    <button onclick="closePreview()">Hủy</button>
+    <div class="btns">
+      <button onclick="confirmPost()">Đăng</button>
+      <button onclick="closePreview()">Hủy</button>
+    </div>
   </div>
 </div>
 
