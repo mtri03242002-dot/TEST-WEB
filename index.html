@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>My Insta</title>
 
-<!-- ICON (Font Awesome) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
@@ -30,7 +29,6 @@ body {
 .actions {
   display: flex;
   gap: 10px;
-  align-items: center;
 }
 
 .uploadBtn, .settingBtn {
@@ -66,7 +64,7 @@ body {
   border-radius: 20px 20px 0 0;
   padding: 20px;
   transition: 0.3s;
-  z-index: 1001; /* 🔥 FIX: luôn nằm trên */
+  z-index: 1001;
 }
 
 #popup.show {
@@ -84,12 +82,11 @@ body {
 
 #popup img {
   width: 100%;
-  max-height: 300px;
+  max-height: 250px;
   object-fit: contain;
-  border-radius: 10px;
 }
 
-/* SETTING PANEL */
+/* SETTING */
 #settingPanel {
   position: fixed;
   top: 60px;
@@ -98,7 +95,6 @@ body {
   padding: 15px;
   border-radius: 12px;
   z-index: 1002;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
 /* FEED */
@@ -116,8 +112,8 @@ body {
 
 .post img {
   width: 100%;
-  height: 250px;
-  object-fit: cover;
+  object-fit: contain;
+  background: #f0f0f0;
 }
 
 .post p {
@@ -133,21 +129,19 @@ body {
   border: none;
   padding: 5px 8px;
   cursor: pointer;
-  border-radius: 5px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- TASKBAR -->
 <div class="taskbar">
   <h2>📸 My Insta</h2>
 
   <div class="actions">
     <label class="uploadBtn">
       <i class="fa-solid fa-plus"></i>
-      <input type="file" id="upload" hidden>
+      <input type="file" id="upload" multiple hidden>
     </label>
 
     <button class="settingBtn" onclick="toggleSetting()">
@@ -159,10 +153,10 @@ body {
 <!-- SETTING -->
 <div id="settingPanel" class="hidden">
   <p>🎨 Màu nền</p>
-  <input type="color" onchange="changeColor(this.value)">
+  <input type="color" id="colorPicker">
 
   <p>🖼️ Size ảnh</p>
-  <input type="range" min="150" max="400" value="250" onchange="changeSize(this.value)">
+  <input type="range" id="sizeRange" min="150" max="350">
 </div>
 
 <!-- OVERLAY -->
@@ -172,33 +166,41 @@ body {
 <div id="popup">
   <div class="handle"></div>
   <img id="previewImg">
-  <input type="text" id="caption" placeholder="Viết caption...">
-  <div class="btns">
-    <button onclick="confirmPost()">Đăng</button>
+  <input type="text" id="caption" placeholder="Caption (áp dụng cho tất cả ảnh)">
+  <div>
+    <button onclick="confirmPost()">Đăng tất cả</button>
     <button onclick="closePreview()">Hủy</button>
   </div>
 </div>
 
-<!-- FEED -->
 <div id="feed"></div>
 
 <script>
 let posts = JSON.parse(localStorage.getItem("posts")) || [];
-let currentImage = "";
-let imgSize = 250;
+let settings = JSON.parse(localStorage.getItem("settings")) || {
+  color: "#87CEEB",
+  size: 200
+};
 
-// render
+let selectedImages = [];
+
+// APPLY SETTING
+document.body.style.background = settings.color;
+document.getElementById("sizeRange").value = settings.size;
+document.getElementById("colorPicker").value = settings.color;
+
+// RENDER
 function render() {
   const feed = document.getElementById("feed");
   feed.innerHTML = "";
 
-  posts.forEach((p, index) => {
+  posts.forEach((p, i) => {
     const div = document.createElement("div");
     div.className = "post";
 
     div.innerHTML = `
-      <button class="deleteBtn" onclick="deletePost(${index})">X</button>
-      <img src="${p.img}" style="height:${imgSize}px">
+      <button class="deleteBtn" onclick="deletePost(${i})">X</button>
+      <img src="${p.img}" style="height:${settings.size}px">
       <p>${p.caption}</p>
     `;
 
@@ -207,67 +209,82 @@ function render() {
 }
 render();
 
-// upload
+// UPLOAD MULTIPLE
 document.getElementById("upload").addEventListener("change", function () {
-  const file = this.files[0];
-  if (!file) return;
+  selectedImages = [];
+  const files = this.files;
 
-  const reader = new FileReader();
+  if (!files.length) return;
 
-  reader.onload = function (e) {
-    currentImage = e.target.result;
-    document.getElementById("previewImg").src = currentImage;
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
 
-    document.getElementById("popup").classList.add("show");
-    document.getElementById("overlay").classList.remove("hidden");
-  };
+    reader.onload = function (e) {
+      selectedImages.push(e.target.result);
 
-  reader.readAsDataURL(file);
+      // preview ảnh đầu tiên
+      document.getElementById("previewImg").src = selectedImages[0];
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById("popup").classList.add("show");
+  document.getElementById("overlay").classList.remove("hidden");
 });
 
-// đăng
+// POST MULTIPLE
 function confirmPost() {
   const caption = document.getElementById("caption").value;
 
-  if (!currentImage) return alert("Chưa chọn ảnh!");
+  if (!selectedImages.length) return alert("Chưa chọn ảnh");
 
-  posts.unshift({ img: currentImage, caption });
+  selectedImages.forEach(img => {
+    posts.unshift({ img, caption });
+  });
+
   localStorage.setItem("posts", JSON.stringify(posts));
 
   closePreview();
   render();
 }
 
-// xoá
+// DELETE
 function deletePost(i) {
   posts.splice(i, 1);
   localStorage.setItem("posts", JSON.stringify(posts));
   render();
 }
 
-// đóng popup
+// CLOSE
 function closePreview() {
   document.getElementById("popup").classList.remove("show");
   document.getElementById("overlay").classList.add("hidden");
+
   document.getElementById("caption").value = "";
   document.getElementById("upload").value = "";
   document.getElementById("previewImg").src = "";
-  currentImage = "";
+  selectedImages = [];
 }
 
-// setting
+// SETTING
 function toggleSetting() {
   document.getElementById("settingPanel").classList.toggle("hidden");
 }
 
-function changeColor(color) {
-  document.body.style.background = color;
-}
+// CHANGE COLOR
+document.getElementById("colorPicker").addEventListener("input", function() {
+  settings.color = this.value;
+  document.body.style.background = settings.color;
+  localStorage.setItem("settings", JSON.stringify(settings));
+});
 
-function changeSize(size) {
-  imgSize = size;
+// CHANGE SIZE
+document.getElementById("sizeRange").addEventListener("input", function() {
+  settings.size = this.value;
+  localStorage.setItem("settings", JSON.stringify(settings));
   render();
-}
+});
 </script>
 
 </body>
