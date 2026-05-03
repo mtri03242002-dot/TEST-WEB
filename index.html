@@ -2,22 +2,36 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Mini Instagram</title>
+  <title>My Insta</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="header">
+<!-- TASKBAR -->
+<div class="taskbar">
   <h2>📸 My Insta</h2>
-  <button onclick="toggleDark()">🌙</button>
+
+  <div class="actions">
+    <label class="uploadBtn">
+      ➕
+      <input type="file" id="upload" hidden>
+    </label>
+
+    <button onclick="toggleDark()">🌙</button>
+  </div>
 </div>
 
-<div class="uploadBox">
-  <input type="file" id="upload">
-  <input type="text" id="caption" placeholder="Viết caption...">
-  <button onclick="addPost()">Đăng</button>
+<!-- PREVIEW POPUP -->
+<div id="previewBox" class="hidden">
+  <div class="previewContent">
+    <img id="previewImg">
+    <input type="text" id="caption" placeholder="Viết caption...">
+    <button onclick="confirmPost()">Đăng</button>
+    <button onclick="closePreview()">Hủy</button>
+  </div>
 </div>
 
+<!-- FEED -->
 <div id="feed"></div>
 
 <script src="script.js"></script>
